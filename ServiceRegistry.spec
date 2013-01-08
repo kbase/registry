@@ -10,7 +10,7 @@ module ServiceRegistry {
 					different types of deployments, such as
 					prod, dev, test, etc.
 	*/
-	structure {
+	typedef structure {
 		string service_name;
 		string namespace;
 	} ServiceInfo;
@@ -38,24 +38,24 @@ module ServiceRegistry {
        of the service to be deregistered must be specified in the input
        argument.
     */
-    funcdef deregister_service(string service_name, string namespace) returns(int success) authentication required;
+    funcdef deregister_service(string service_name, string namespace) returns (int success) authentication required;
     
     /* Update the nginx conf file. This function should be considered
 	   private in so far as it would only be called from the 
 	   register_service and deregister_service.
     */
-	funcdef update_nginx (string service_name, string namespace) returns(int success) authentication required;
+	funcdef update_nginx(string service_name, string namespace) returns (int success) authentication required;
 
 	/* Provide a list of available services. The enumerate_services
 	   simply returns the entire set of services that are available.
 	*/
-	funcdef enumerate_services() returns (mapping<ServiceName name, list<Namespace namespaces>>);
+	funcdef enumerate_services() returns (mapping<string service_name, list<string> namespaces>);
 
 	/* Get the interface description document for the service. The
        get_service_specification returns a string that represents the
        interface specification for the given service.
 	*/
-	get_service_specification(string service_name, string namespace) returns (string specification);
+	funcdef get_service_specification(string service_name, string namespace) returns (string specification);
 
 
 
@@ -70,7 +70,7 @@ module ServiceRegistry {
 	/*  Get the seconds remaining until the service registration expires.
 
 	*/
-	funcdef get_expiration_interval(string service_name, string namespace) returns(int seconds_before_service_expiration);
+	funcdef get_expiration_interval(string service_name, string namespace) returns (int seconds_before_service_expiration);
 
-}
+};
 
