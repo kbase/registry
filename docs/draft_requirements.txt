@@ -1,0 +1,316 @@
+Requirement categories:
+	availability
+	service versions
+	namespace
+	authentication and authorization
+	meta data
+	use in deployments
+	reflection
+	registry replication
+
+
+Daniel Gunter:
+
+    Thinking of the narrative UI client, it seems like 2 things would be useful. (1) knowing whether services are alive en masse, i.e. without having to ping every one -- could is_alive be added to service info?
+
+REQ: (dan) (availability) The registry will enable a single call recursive is_alive that checks all registered services.
+
+Shiran:
+
+Good idea. A related note is that now that we have explicit dependencies for services, the original dream of a recursive is_alive is possible. This would be a variant of is_alive which checks service X.version as well as the dependent services. Another useful variant would return the reverse dependent services.
+
+REQ: (shiran) (availability) The registry will enable a single call recursive is_alive that checks a given service version and all dependent services.
+
+==
+
+Marcin
+
+Good idea. A related note is that now that we have explicit dependencies for services, the original dream of a recursive is_alive is possible. This would be a variant of is_alive which checks service X.version as well as the dependent services. Another useful variant would return the reverse dependent services.
+
+
+
+==
+
+Dan G
+
+Thinking of the narrative UI client, it seems like 2 things would be useful. (1) knowing whether services are alive en masse, i.e. without having to ping every one -- could is_alive be added to service info? (2) more intelligent version filtering, e.g. accept ">= 1.2.3 && < 1.3.0" . The reason for the second is to try to reduce the ease with which churn in the services will break narratives; what would be ideal is for the KBase services to "know" how many narratives reference them, and to not go away until that number drops to zero (modulo ignoring old narratives).
+
+REQ: (dan) (availability) The registry will support a single function call that returns the state of all services.
+
+REQ: (dan) (version) The registry will support query filters on service versions that support version ranges. e.g. accept ">= 1.2.3 && < 1.3.0"
+
+
+
+
+==
+
+Marcin
+
+It does seem like a bad idea for this service to be deployable by anyone, anytime. Perhaps deployment of this service could require a special authentication? Additionally, we could have an 'exclusion lock' so that if one service (with a specific namespace) is running than no new registry service (in that namespace) can be deployed without stopping the existing one.
+
+At the least there will need to be test (and private developer test) and production registry services, different URLs can get messy so some kind of namespace distinction will help.
+
+
+==
+
+Matt
+
+
+Scott, actually the client may also need a version number for the service, since a service can be registered with the same name using different version numbers.  
+
+REQ: (matt) (version) A client can request a URL for a specific version of a service.
+
+
+
+==
+
+Matt
+
+A category is simply to identify which registry service endpoint a service is associated with.
+
+For the sake of simplicity, we are assuming one registry service (maybe some load balancing of each) would exist for development, test, production.  The difference would be that the production registry service would not require authentication for get_*, where the others would.
+
+This should not affect namespaces, unless I am not understanding your point.  Did you mean you want to run your own registry service?
+
+Mike S
+
+Ah, so this actually brings up an important design decision.  We can either have multiple registry instances, with one for production, testing, development, etc, then possibly allow developers to set up their own instances (in which case we also need a registry of registries).  OR, have only a single registry service running, but use the namespace convention itself to specify whether we want to find the production vs. dev vs. testing service end points.
+
+I would propose the latter, so that developers don't have to manage their own registries, and so that you can do things like dynamically and temporarily set up a namespace for testing at a specific build meeting.  That way, we can easily setup as many testing/development/collaborator service environments as we need, and we don't get into issues of defining globally what it means to be 'test' vs. 'development'.  I think we would actually use this feature quite often when working with collaborators if we want them to be able to use a set of services that aren't yet public.  We can just hand them the name of the namespace that we created, and all their client code will automatically point to the right service end points.  In fact, narratives could use a similar convention with a namespace option that allows the narrative to run with a different set of service endpoints.  You could almost imagine something that looks like a Tiny Store being set up this way....
+
+Authentication would then always be optional, with the ability to enforce authentication only on some namespaces.
+
+REQ: (mike) (namespace) There will be a namespace that resolves services in production from services in testing from services in development.
+
+REQ: (mike) (namespace) Service developers can create their own namespaces.
+
+REQ: (mike) (namespace) There will be one registry that supports multiple namespaces.
+
+REQ: (mike) (deployment) The registry will architecturally appear as a singleton.
+
+REQ: (mike) (auth) Authentication can be enforeced on some namespaces.
+
+Matt
+
+I see, so we were missing the concept of needing a private set of services for a particular group.
+
+It seems like we should still have "official" namespaces though, much like the category idea.
+I see in the B spec that they do specify that there would be a "production" namespace reserved.
+
+REQ: (matt) (namespace) There will be a set of reserved namespaces. One of these will be 'production'.
+
+The only need for a custom namespace would be to restrict access, but it would also serve as a convenience.
+
+I don't think all namespaces should be visible though to everyone.  It should be only those that you have access to.
+
+REQ: (matt) (auth) (namespace) A namespace is visible if the requester is in the appropriate group (should be managed by ACLs).
+
+Matt
+
+==
+
+Matt
+
+Speaking for Group A,
+
+The service status reporting implied by is_alive as discussed when the spec was being written would only serve to tell you if a service is responding to network requests (e.g. pingable), which does not take into account a variety of failures on the server side that could prevent a service from successfully processing requests.  I spoke to Tom about this and he acknowledged that this would not account for things like a service running out of usable disk space for handling requests.  
+
+REQ: (matt) (availability) is_alive will only verify that the end-point can be reached over the WAN.
+
+We would need to modify the existing services (add monitoring, etc) to get a better status report on each service.  I think something else would be responsible for actually doing the monitoring, but from a convenience standpoint it would be nice to get the status of each service from the registry service.  So for this version of the registry service it was known that accurate status monitoring would not be present.
+
+REQ: (matt) (reliability) A status method will verify the status of a running service.
+
+The "certified" has to do with whether or not a KBase service has been formally tested/etc by KBase, so 3rd party developers may not have "certified" services until some process was in place to "certify" their work.  This was something Tom had brought up that we attempted to capture in the spec.
+
+REQ: (matt) (meta data) The registry will store meta data that indicates if a service has been formally tested by KBase in a boolean form such as certified or uncertified.
+
+
+==
+
+Mike S.
+
+One point I'd like to highlight is that part of the reason for having namespaces is to allow developers to define new namespaces (e.g. a set of service endpoints) that they are developing/testing rapidly together.  So to echo Scott's point, we don't necessarily need a single 'test' or 'development' namespace.  Rather developers could create their own namespace for each specific group of interdependent services in development.  
+
+One cool use case for namespaces and the registry is that, in principle, a service could easily switch between production/test/development deployments by changing a single configuration variable indicating the namespace to use, assuming for now that services don't depend on multiple namespaces (eg. 'production' CDMI, but 'test' for the other services).  What would be great is if this configuration could be handled with the new deploy.cfg conventions we are adopting.  This might also help with streamlining the testing process, because it would then be trivial to switch between testing on localhost, vs. testing against production or other remote servers.
+
+REQ: (mike) (namespace) Developers can create their own namespace for services in development.
+
+REQ: (mike) (namespace) Clients can switch between production, test, and development services by changing a single configuration variable.
+
+REQ: (mike) (deployment) The deploy.cfg file in the module will support client switching between different service namespaces.
+
+
+==
+
+Dan Gunter:
+
+Right, so the use-case here I believe is a client trying to keep its list of services up to date. Clients will probably want this information periodically, e.g. once per hour. They will at least need a name and brief description of every service. Details like parameters etc. could be fetched on-demand.
+
+This next is speculation. Assuming "I updated the service to fix the bug" and "the new version has a bug, use the old one" will both happen, a client may want to get a specific version (number or date-based) of a service. Or perhaps get the "dev" vs. "production" list of service URLs.
+
+Another issue to think about on the back-end but not a burning requirement is how extra metadata about services, like detailed usage metrics, can be found.
+
+REQ: (dan) (availability) The client can query the registry once per hour to ensure the client's list of service urls are up to date.
+
+REQ: (dan) (reflection) The registry will return parameters on demand.
+
+REQ: (dan) (version) A client can retreive a URL by service version number.
+
+REQ: (dan) (namespace) A client can get a list of urls based on dev and prod tokens.
+
+REQ: (dan) (meta data) The registry will store service useage metrics.
+
+==
+
+Scott:
+
+An additional thought:
+
+Would it be useful to include a "type" field for each service? The enumeration I'm thinking of now is: rpc, rest, web. This would allow us to register non-typespec / RPC services and gather documentation, heartbeat and other information about them.
+
+REQ: (scott) (namespace) The registry will support a set of enumerated service types.
+
+REQ: (scott) (namespace) The semantics of a service type refers to the technology stack supporting the service.
+
+Single point of failure: multiple instances of this service could be deployed as long as the infrequent writes (service updates) were handled properly.
+
+REQ: (scott) (reliability) For multiple instances of the registry, writes are managed to avoid instances having unsyncronized list of services.
+
+
+==
+
+Chris:
+
+Now that we have domain names in kbase.us for each service, and now that most services have at least one deployed release, this doesn't seem as urgent to me… but it would still be useful to have. Just need to be careful we aren't engineering a single point of failure into the system.
+
+REQ: (chris) (availability) The registry will not be a single point of system failure.
+
+==
+
+Scott:
+
+We could simplify both by ditching the idea of "production", "development" and "test" categories / namespaces. If we think about it, your "test" services may not be the same as my "test" services. Instead, each of us should deploy a service registry in addition to our other services. This doesn't change the amount of information that needs to be injected into the clients and client CLIs (you have to inject either a "category", a "namespace" or a "registry url". Plus it allows us to more easily test / debug the registry itself.
+
+REQ: (scott) (version) Allow different developers to access different versions of the same service in a test environment.
+
+Versions: (Group B)
+- Yes, registering services with the version is good. Asking for an endpoint with a version is a good idea, but what if I register my service "v1.0.3" and you request "v1.0"? Doing semantic versioning would give us a clear and desirable answer in this situation.
+
+REQ: (scott) (version) Return a url based on a service version number.
+REQ: (scott) (version) Perform semantic versioning on services.
+
+- URL to a documentation page. Yes. More useful than an email address. Do we want to expose emails of devs to end users? I question the "certified" option. Who does the certifying and what does that mean? Why is it in a registry but not certified?
+
+REQ: (scott) (reflection) The registry will return a url to the documentation page.
+
+==
+
+Adam:
+
+Well- if nothing else the narrative UI has to populate the list of available running services for the user to choose from. 
+
+REQ: (adam) (availability) Return a list of available running services for the user to choose from.
+==
+
+Shiran:
+
+My primary use case is retrieving an index (e.g., JSON, XML, CSV) programmatically for URLs of running services so that I can refer to them by name. It's a real headache maintaining a hardcoded table of service endpoints. I'm often connecting to multiple services within single workflows. It would be really useful to have development and production service registries.
+
+REQ: (shiran) (availability) Return a data structure for URLs of running services that allows clients to refer to the service URL by name.
+
+Specs:
+
+https://trac.kbase.us/projects/kbase/wiki/ServiceBluePrints
+https://trac.kbase.us/projects/kbase/wiki/RegistryService
+
+Chris:
+
+REQ: (chris) (availability) The registry will support client side commands that fetch service urls.
+
+REQ: (chris) (namespace) These client side commands will be named according to the kbase command line interface naming conventions.
+
+
+Scott:
+One additional use for this is to populate the service-scripts with the endpoint URLs. Currently there is a default URL hard-coded in each script file. Some scripts additionally accept a --url option. Are there scripts that read the URL from an environment variable?
+
+There are two places where I see the service-registry providing the URL:
+1. At module deploy-client time, some script queries the registry and initializes the "hardcoded" script with the service URL.
+2. At runtime, where some library exists for discovering the endpoint URL.
+
+I like #2. For this, the service-registry must itself be a service, with a funcdef like the following:
+
+funcdef get_service_url ( string service_name ) returns ( string service_url );
+
+Then scripts implemented in perl, python, java, etc. could discover where the desired service was deployed given a single URL for the registry.
+
+
+
+
+I conducted an experiment using the service registry. My primary goal was to motivate the team to design a solid registry while learning some things in the process. The experiment started by segregating a bootcamp class into two teams. Each team was given the same problem. The problem was to produce an interface description document for a service registry. A week later, I posted a request for requirements for the service registry to the kbase-devel mail list. I allowed two days for discussion, after which I collected the emails and parsed the emails for requirements. I recorded the requirement and who posted it. I then grouped requirements by design point where as a design point is a high level design attribute describing the nature of the requirement.
+
+Design Points:
+	namespace - mostly concerned with the deliniation of a production service end point from a development service end point.
+	availability - mostly concerned with ascertaining whether a service at a given endpoint is reachable over the WAN.
+	version - mostly concerned with being able to retreive a service endpoint based on a service version number.
+	reliability - concerned with a service returning the correct answer.
+	reflection - concerned with obtaining information about a service such as functions, data types, parameters, and documentation.
+	meta data - mostly concerned with information about a service not associated with reflection.
+	deployment - deals with topics related to the process of deploying a service and configuration files.
+	auth - deals with authentication and authorization.
+
+Results:
+
+Design point most talked about
+
+     10 (namespace)
+      9 (availability)
+      6 (version)
+      2 (reliability)
+      2 (reflection)
+      2 (meta data)
+      2 (deployment)
+      2 (auth)
+
+Developer with most understandable (by Tom) requirements
+
+      8 (mike)
+      8 (dan)
+      7 (scott)
+      6 (matt)
+      3 (chris)
+      2 (shiran)
+      1 (adam)
+
+Developer interest in design point
+
+      5 (mike) (namespace)
+      3 (scott) (version)
+      3 (dan) (availability)
+      2 (shiran) (availability)
+      2 (scott) (namespace)
+      2 (mike) (deployment)
+      2 (dan) (version)
+      2 (chris) (availability)
+      1 (scott) (reliability)
+      1 (scott) (reflection)
+      1 (mike) (auth)
+      1 (matt) (version)
+      1 (matt) (reliability)
+      1 (matt) (namespace)
+      1 (matt) (meta data)
+      1 (matt) (availability)
+      1 (matt) (auth)
+      1 (dan) (reflection)
+      1 (dan) (namespace)
+      1 (dan) (meta
+      1 (chris) (namespace)
+      1 (adam) (availability)
+
+Discussion:
+
+Mike presented the most requirements.
+Issues of what namespace a service url was in (prod, dev, ...) was the most discussed.
+Matt was able to present requirements across the broadest range of design points.
+
+
