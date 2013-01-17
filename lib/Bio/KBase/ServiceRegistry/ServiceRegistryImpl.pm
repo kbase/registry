@@ -18,15 +18,19 @@ ServiceRegistry
 #BEGIN_HEADER
 use MongoDB;
 use MongoDB::OID;
+use MongoDB::MongoClient;
 use Config::Simple;
 use JSON -support_by_pp;
+
 # set package variables
-my $cfg = {};
+our $cfg = {};
 if (defined $ENV{KB_DEPLOYMENT_CONFIG} && -e $ENV{KB_DEPLOYMENT_CONFIG}) {
 	$cfg = new Config::Simple($ENV{KB_DEPLOYMENT_CONFIG});
 }
 else {
 	$cfg->{'mongodb-host'} = 'mongodb.kbase.us';
+	$cfg->{'mongodb-db'}   = 'registry';
+	$cfg->{'mongodb-collection'} = 'test';
 }
 #END_HEADER
 
@@ -37,7 +41,7 @@ sub new
     };
     bless $self, $class;
     #BEGIN_CONSTRUCTOR
-	$self->{'conn'} = MongoDB::Connection->new(host => $cfg->{'mongodb-host'});
+	$self->{'client'} = MongoDB::MongoClient->new(host => $cfg->{'mongodb-host'});
     #END_CONSTRUCTOR
 
     if ($self->can('_init_instance'))
@@ -128,23 +132,39 @@ sub register_service
 	defined $info->{'hostname'}     or die"service info did not contain a hostname";
 	defined $info->{'service_name'} or die "service info did not contain a service_name";
 	defined $info->{'port'}         or die "service info did not contain a port";
-	defined $info->{'namespace'}      or die "service info did not contain a namespace";
+	defined $info->{'namespace'}    or die "service info did not contain a namespace";
 
 	# convert service info to json doc
 	my $json_text = to_json($info, {pretty=>1});
-	print $json_text;
 
 	# validate json doc
 
 
-	# insert json doc into mongo db
+	# get the mongo database collection
+        my $collection = $self->{'client'}->get_database($cfg->{'mongodb-db'})->get_collection($cfg->{'mongodb-collection'});
 
+	# check to make sure this service is not already registered
+        my $object = $collection->find_one({hostname => $info->{hostname},
+					    service_name => $info->{service_name},
+					    port => $info->{port},
+					    namespace => $info->{namespace}},
+					  );
+	if (defined $object and (keys %$object)) {
+        	# stuff this in an error string  if $object is defined
+        	my $msg  = "duplicate service found\n";
+        	$msg    .= "$_\t$object->{$_}\n" foreach (keys %$object);
+		Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+                                                               method_name => 'register_service');
+	}
+
+	# insert json doc into mongo db
+	my $oid  = $collection->insert($info, {safe => 1});
 
 	# update nginx config
 	$self->update_nginx($info);
 
 	# return service id
-	$service_id=1;
+	$service_id=$oid->to_string;
 
     #END register_service
     my @_bad_returns;
@@ -334,7 +354,13 @@ sub update_nginx
 =begin html
 
 <pre>
-$return is a reference to a hash where the key is a string and the value is a reference to a list where each element is a string
+$return is a reference to a list where each element is a ServiceInfo
+ServiceInfo is a reference to a hash where the following keys are defined:
+	service_name has a value which is a string
+	namespace has a value which is a string
+	hostname has a value which is a string
+	port has a value which is an int
+	ip_allows has a value which is a reference to a list where each element is a string
 
 </pre>
 
@@ -342,7 +368,13 @@ $return is a reference to a hash where the key is a string and the value is a re
 
 =begin text
 
-$return is a reference to a hash where the key is a string and the value is a reference to a list where each element is a string
+$return is a reference to a list where each element is a ServiceInfo
+ServiceInfo is a reference to a hash where the following keys are defined:
+	service_name has a value which is a string
+	namespace has a value which is a string
+	hostname has a value which is a string
+	port has a value which is an int
+	ip_allows has a value which is a reference to a list where each element is a string
 
 
 =end text
@@ -365,9 +397,26 @@ sub enumerate_services
     my $ctx = $Bio::KBase::ServiceRegistry::Service::CallContext;
     my($return);
     #BEGIN enumerate_services
+	my $collection = $self->{client}->get_database($cfg->{'mongodb-db'})->get_collection($cfg->{'mongodb-collection'});
+	my $cursor  = $collection->find();
+	while (my $object = $cursor->next()) {
+	
+		my $json_text = to_json($object, {convert_blessed => 1, pretty => 1});
+		print $json_text;
+
+		# construct a ServiceInfo structure
+		my $info->{service_name} = $object->{service_name};
+		$info->{namespace} = $object->{namespace};
+		$info->{hostname}  = $object->{hostname};
+		$info->{port}      = $object->{port};
+		$info->{ip_allows} = $object->{ip_allows};
+		
+		push @$return, $info;
+	}
+	
     #END enumerate_services
     my @_bad_returns;
-    (ref($return) eq 'HASH') or push(@_bad_returns, "Invalid type for return variable \"return\" (value was \"$return\")");
+    (ref($return) eq 'ARRAY') or push(@_bad_returns, "Invalid type for return variable \"return\" (value was \"$return\")");
     if (@_bad_returns) {
 	my $msg = "Invalid returns passed to enumerate_services:\n" . join("", map { "\t$_\n" } @_bad_returns);
 	Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
