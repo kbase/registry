@@ -52,7 +52,7 @@ module ServiceRegistry {
 	/* Provide a list of available services. The enumerate_services
 	   simply returns the entire set of services that are available.
 	*/
-	funcdef enumerate_services() returns (mapping<string service_name, list<string> namespaces>);
+	funcdef enumerate_services() returns (list<ServiceInfo>);
 
 	/* Get the interface description document for the service. The
        get_service_specification returns a string that represents the
