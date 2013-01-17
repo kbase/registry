@@ -142,7 +142,7 @@ sub register_service
 
 
     # get the mongo database collection
-    my $database = $self->get_database($cfg->{'mongodb-db'});
+    my $database = $self->{client}->get_database($cfg->{'mongodb-db'});
     my $collection = $database->get_collection($cfg->{'mongodb-collection'});
 
     # check to make sure this service is not already registered
