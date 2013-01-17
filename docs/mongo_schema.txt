@@ -1,0 +1,32 @@
+{
+	"title": "Registry Schema",
+	"type": "object",
+	"properties": {
+		"idd": {
+			"type": "string"
+		},
+		"service_name": {
+			"type": "string"
+		},
+		"namespace": {
+			"type": "string"
+		},
+		"hostname": {
+			"type": "string"
+		},
+		"port": {
+			"type": "integer"
+		},
+		"ip_allows": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"ip_address": {
+						"type": "string"
+					}
+				}
+			}
+		}
+	"required": ["service_name","namespace","host_name","service_port"]
+}
