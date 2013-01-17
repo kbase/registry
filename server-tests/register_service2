@@ -1,7 +1,6 @@
-perl -e 'use ServiceRegistryImpl; $s = Bio::KBase::ServiceRegistry::ServiceRegistryImpl->new(); $s->register_service({namespace=>"test", service_name=>"registry", hostname=>"localhost", port=>1099});'
-{
-   "service_name" : "registry",
-   "namespace" : "test",
-   "hostname" : "localhost",
-   "port" : 1099
-}
+use Bio::KBase::ServiceRegistry::ServiceRegistryImpl;
+$s = Bio::KBase::ServiceRegistry::ServiceRegistryImpl->new();
+$s->register_service({namespace=>"test", 
+			service_name=>"registry",
+			hostname=>"localhost",
+			port=>1099});
