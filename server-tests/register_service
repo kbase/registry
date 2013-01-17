@@ -1,3 +1,0 @@
-perl -e 'use ServiceRegistryImpl; $s = Bio::KBase::ServiceRegistry::ServiceRegistryImpl->new(); $s->register_service({service_name=>"registry", hostname=>"localhost", port=>1099});'
-
-This should vail because namespace is not defined
