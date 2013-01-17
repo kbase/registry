@@ -1,0 +1,7 @@
+use Bio::KBase::ServiceRegistry::ServiceRegistryImpl;
+$s = Bio::KBase::ServiceRegistry::ServiceRegistryImpl->new();
+$objs = $s->enumerate_services();
+foreach $info (@$objs) {
+	print "\n";
+	print "$_: $info->{$_}\n" foreach keys %$info;
+}

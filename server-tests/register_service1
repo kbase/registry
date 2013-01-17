@@ -1,0 +1,7 @@
+use Bio::KBase::ServiceRegistry::ServiceRegistryImpl;
+$s = Bio::KBase::ServiceRegistry::ServiceRegistryImpl->new();
+$s->register_service({service_name=>"registry",
+		      hostname=>"localhost",
+		      port=>1099});
+
+# This should fail because namespace is not defined
