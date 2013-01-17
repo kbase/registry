@@ -25,12 +25,12 @@ use JSON -support_by_pp;
 # set package variables
 our $cfg = {};
 if (defined $ENV{KB_DEPLOYMENT_CONFIG} && -e $ENV{KB_DEPLOYMENT_CONFIG}) {
-	$cfg = new Config::Simple($ENV{KB_DEPLOYMENT_CONFIG});
+    $cfg = new Config::Simple($ENV{KB_DEPLOYMENT_CONFIG});
 }
 else {
-	$cfg->{'mongodb-host'} = 'mongodb.kbase.us';
-	$cfg->{'mongodb-db'}   = 'registry';
-	$cfg->{'mongodb-collection'} = 'test';
+    $cfg->{'mongodb-host'} = 'mongodb.kbase.us';
+    $cfg->{'mongodb-db'}   = 'registry';
+    $cfg->{'mongodb-collection'} = 'test';
 }
 #END_HEADER
 
@@ -41,7 +41,8 @@ sub new
     };
     bless $self, $class;
     #BEGIN_CONSTRUCTOR
-	$self->{'client'} = MongoDB::MongoClient->new(host => $cfg->{'mongodb-host'});
+    $self->{'client'} = 
+	MongoDB::MongoClient->new(host => $cfg->{'mongodb-host'});
     #END_CONSTRUCTOR
 
     if ($self->can('_init_instance'))
@@ -128,43 +129,44 @@ sub register_service
     my($service_id);
     #BEGIN register_service
 
-	# validate args
-	defined $info->{'hostname'}     or die"service info did not contain a hostname";
-	defined $info->{'service_name'} or die "service info did not contain a service_name";
-	defined $info->{'port'}         or die "service info did not contain a port";
-	defined $info->{'namespace'}    or die "service info did not contain a namespace";
+    # validate args
+    defined $info->{'hostname'}   or die"no hostname in service info";
+    defined $info->{'service_name'} or die "no service_name in service info";
+    defined $info->{'port'}       or die "no port in service info";
+    defined $info->{'namespace'}  or die "no namespace in service info";
 
-	# convert service info to json doc
-	my $json_text = to_json($info, {pretty=>1});
+    # convert service info to json doc
+    my $json_text = to_json($info, {pretty=>1});
 
-	# validate json doc
+    # validate json doc
 
 
-	# get the mongo database collection
-        my $collection = $self->{'client'}->get_database($cfg->{'mongodb-db'})->get_collection($cfg->{'mongodb-collection'});
+    # get the mongo database collection
+    my $database = $self->get_database($cfg->{'mongodb-db'});
+    my $collection = $database->get_collection($cfg->{'mongodb-collection'});
 
-	# check to make sure this service is not already registered
-        my $object = $collection->find_one({hostname => $info->{hostname},
-					    service_name => $info->{service_name},
-					    port => $info->{port},
-					    namespace => $info->{namespace}},
-					  );
-	if (defined $object and (keys %$object)) {
-        	# stuff this in an error string  if $object is defined
-        	my $msg  = "duplicate service found\n";
-        	$msg    .= "$_\t$object->{$_}\n" foreach (keys %$object);
-		Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
-                                                               method_name => 'register_service');
-	}
+    # check to make sure this service is not already registered
+    my $object = $collection->find_one({hostname => $info->{hostname},
+					service_name => $info->{service_name},
+					port => $info->{port},
+					namespace => $info->{namespace}},
+	);
+    if (defined $object and (keys %$object)) {
+	# stuff this in an error string  if $object is defined
+	my $msg  = "duplicate service found\n";
+	$msg    .= "$_\t$object->{$_}\n" foreach (keys %$object);
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+                                            method_name => 'register_service');
+    }
 
-	# insert json doc into mongo db
-	my $oid  = $collection->insert($info, {safe => 1});
+    # insert json doc into mongo db
+    my $oid  = $collection->insert($info, {safe => 1});
 
-	# update nginx config
-	$self->update_nginx($info);
+    # update nginx config
+    $self->update_nginx($info);
 
-	# return service id
-	$service_id=$oid->to_string;
+    # return service id
+    $service_id=$oid->to_string;
 
     #END register_service
     my @_bad_returns;
