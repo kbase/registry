@@ -54,9 +54,15 @@ module ServiceRegistry {
 	*/
 	funcdef enumerate_services() returns (list<ServiceInfo>);
 
+	/* Provide a list of available service urls. The enumerate_service_urls
+	   returns the entire set of service urls that are registered in
+	   the registry.
+	*/
+	funcdef enumerate_service_urls() returns (list<string>);
+
 	/* Get the interface description document for the service. The
-       get_service_specification returns a string that represents the
-       interface specification for the given service.
+           get_service_specification returns a string that represents the
+           interface specification for the given service.
 	*/
 	funcdef get_service_specification(string service_name, string namespace) returns (string specification);
 
