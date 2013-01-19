@@ -1,0 +1,14 @@
+use Bio::KBase::ServiceRegistry::ServiceRegistryImpl;
+
+$query = {
+   "service_name" => "registry",
+   "namespace" => "test",
+   "hostname" => "localhost",
+   "port" => 1097
+};
+
+$s = Bio::KBase::ServiceRegistry::ServiceRegistryImpl->new();
+$objs = $s->enumerate_service_urls();
+foreach $url (@$objs) { print $url, "\n"; }
+$rv = $s->deregister_service($query);
+print "$rv\n";
