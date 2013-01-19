@@ -128,7 +128,11 @@ sub register_service
     my $ctx = $Bio::KBase::ServiceRegistry::Service::CallContext;
     my($service_id);
     #BEGIN register_service
-
+        unless ($ctx->authenticated) {
+                my $msg = "Unauthenticated user attempt to call update_nginx";
+                Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+                                                               method_name => 'update_nginx');
+        }
     # validate args
     defined $info->{'hostname'}   or my $msg = "no hostname in service info";
     defined $info->{'service_name'} or my $msg = "no service_name in service info";
@@ -254,6 +258,11 @@ sub deregister_service
     my $ctx = $Bio::KBase::ServiceRegistry::Service::CallContext;
     my($success);
     #BEGIN deregister_service
+        unless ($ctx->authenticated) {
+                my $msg = "Unauthenticated user attempt to call update_nginx";
+                Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+                                                               method_name => 'update_nginx');
+        }
 	# validate service info object
 	
 	# delete service document from collection
@@ -350,6 +359,12 @@ sub update_nginx
     my $ctx = $Bio::KBase::ServiceRegistry::Service::CallContext;
     my($success);
     #BEGIN update_nginx
+	unless ($ctx->authenticated) {
+		my $msg = "Unauthenticated user attempt to call update_nginx";
+		Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+                                                               method_name => 'update_nginx');
+	}
+
 	$success = 1;
     #END update_nginx
     my @_bad_returns;
