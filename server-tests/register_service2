@@ -1,6 +1,14 @@
 use Bio::KBase::ServiceRegistry::ServiceRegistryImpl;
+$query = {
+   "service_name" => "registry",
+   "namespace" => "test",
+   "hostname" => "localhost",
+   "port" => 1097
+};
 $s = Bio::KBase::ServiceRegistry::ServiceRegistryImpl->new();
-$s->register_service({namespace=>"test", 
-			service_name=>"registry",
-			hostname=>"localhost",
-			port=>1099});
+eval {
+	$s->register_service($query);
+};
+if($@) {
+	print $@;
+}
