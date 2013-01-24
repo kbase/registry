@@ -9,6 +9,12 @@ Requirement categories:
 	registry replication
 
 
+Mike Sneddon:
+
+    I want the specific URL of a running FBA service that is using a specific URL of a running workspace service.
+
+REQ: (mike) (availability) Given a url for a running service A, obtain all urls and service names that the running service A is using.
+
 Daniel Gunter:
 
     Thinking of the narrative UI client, it seems like 2 things would be useful. (1) knowing whether services are alive en masse, i.e. without having to ping every one -- could is_alive be added to service info?
@@ -264,7 +270,7 @@ Results:
 Design point most talked about
 
      10 (namespace)
-      9 (availability)
+     10 (availability)
       6 (version)
       2 (reliability)
       2 (reflection)
@@ -274,7 +280,7 @@ Design point most talked about
 
 Developer with most understandable (by Tom) requirements
 
-      8 (mike)
+      9 (mike)
       8 (dan)
       7 (scott)
       6 (matt)
@@ -295,6 +301,7 @@ Developer interest in design point
       1 (scott) (reliability)
       1 (scott) (reflection)
       1 (mike) (auth)
+      1 (mike) (availiability)
       1 (matt) (version)
       1 (matt) (reliability)
       1 (matt) (namespace)

@@ -2,8 +2,9 @@ TOP_DIR = ../..
 DEPLOY_RUNTIME ?= /kb/runtime
 TARGET ?= /kb/deployment
 SERVICE_SPEC = ServiceRegistry.spec
+SERVICE_NAME = ServiceRegistry
 
-#include $(TOP_DIR)/tools/Makefile.common
+include $(TOP_DIR)/tools/Makefile.common
 
 # to wrap scripts and deploy them to $(TARGET)/bin using tools in
 # the dev_container. right now, these vars are defined in
@@ -144,6 +145,7 @@ deploy-client: deploy-libs deploy-scripts deploy-docs
 # individual api functions and aggregated sets of api functions.
 
 deploy-libs: build-libs
+	rsync --exclude '*.bak*' -arv lib/. $(TARGET)/lib/.
 
 # Deploying scripts needs some special care. They need to run
 # in a certain runtime environment. Users should not have
@@ -175,7 +177,7 @@ deploy-scripts:
 	for src in $(SRC_PERL) ; do \
 		basefile=`basename $$src`; \
 		base=`basename $$src .pl`; \
-		@echo install $$src $$base ; \
+		echo install $$src $$base ; \
 		cp $$src $(TARGET)/plbin ; \
 		$(WRAP_PERL_SCRIPT) "$(TARGET)/plbin/$$basefile" $(TARGET)/bin/$$base ; \
 	done
@@ -183,7 +185,7 @@ deploy-scripts:
 # Deploying a server refers to the deployment of ...{TODO}
 
 deploy-service:
-	@echo "nothing to be done for deploy-service"
+	echo "nothing to be done for deploy-service"
 
 # Deploying docs here refers to the deployment of documentation
 # of the API. We'll include a description of deploying documentation
@@ -191,6 +193,7 @@ deploy-service:
 # how to standardize and automate CLI documentation.
 
 deploy-docs: build-docs
+	-mkdir -p $(TARGET)/services/$(SERVICE_NAME)/webroot/.
 	cp docs/*.html $(TARGET)/services/$(SERVICE_NAME)/webroot/.
 
 # The location of the Client.pm file depends on the --client param
@@ -227,3 +230,6 @@ build-libs:
 		--scripts scripts \
 		$(SERVICE_SPEC) lib
 
+	-rm -r Bio
+	# For some strange reason compile_typespec always creates
+	# this in the root dir.

@@ -1,0 +1,3 @@
+use Bio::KBase::ServiceRegistry::ServiceRegistryImpl;
+$s = Bio::KBase::ServiceRegistry::ServiceRegistryImpl->new();
+$objs = $s->enumerate_services();
