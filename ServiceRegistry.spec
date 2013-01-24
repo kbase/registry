@@ -2,7 +2,7 @@ module ServiceRegistry {
 
     /* TYPE DECLARATIONS */
 
-	/* Information about a service such as it's name and it's 
+	/* Information about a service such as its name and its 
 	   namespace are captured in the ServiceInfo structure.
 	   The keys and values in the structure are:
 		service_name - holds a string that is the service name.
