@@ -3,6 +3,9 @@ DEPLOY_RUNTIME ?= /kb/runtime
 TARGET ?= /kb/deployment
 SERVICE_SPEC = ServiceRegistry.spec
 SERVICE_NAME = ServiceRegistry
+SERVICE_DIR = registry
+
+TPAGE_ARGS = --define kb_top=$(TARGET) --define kb_runtime=$(DEPLOY_RUNTIME) --define kb_service_name=$(SERVICE_NAME) --define kb_service_dir=$(SERVICE_DIR)
 
 include $(TOP_DIR)/tools/Makefile.common
 
@@ -183,9 +186,18 @@ deploy-scripts:
 	done
 
 # Deploying a server refers to the deployment of ...{TODO}
-
+# Deploying a service refers to the code that implements the logic
+# that handles requests from remote clients. Typically, this can
+# be thought of as the code that is deployed on a server (server-side code).
+# This target should include the creation of a start and stop server script.
+# The start server script needs to know the service port and needs
+# to set the $KB_DEPLOYMENT_CONFIG environment variable.
 deploy-service:
-	echo "nothing to be done for deploy-service"
+	$(TPAGE) $(TPAGE_ARGS) service/start_service.tt > $(TARGET)/services/$(SERVICE)/start_service
+	chmod +x $(TARGET)/services/$(SERVICE)/start_service
+	$(TPAGE) $(TPAGE_ARGS) service/stop_service.tt > $(TARGET)/services/$(SERVICE)/stop_service
+	chmod +x $(TARGET)/services/$(SERVICE)/stop_service
+	echo "done executing deploy-service target"
 
 # Deploying docs here refers to the deployment of documentation
 # of the API. We'll include a description of deploying documentation
@@ -193,8 +205,8 @@ deploy-service:
 # how to standardize and automate CLI documentation.
 
 deploy-docs: build-docs
-	-mkdir -p $(TARGET)/services/$(SERVICE_NAME)/webroot/.
-	cp docs/*.html $(TARGET)/services/$(SERVICE_NAME)/webroot/.
+	-mkdir -p $(TARGET)/services/$(SERVICE_DIR)/webroot/.
+	cp docs/*.html $(TARGET)/services/$(SERVICE_DIR)/webroot/.
 
 # The location of the Client.pm file depends on the --client param
 # that is provided to the compile_typespec command. The
