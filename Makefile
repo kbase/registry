@@ -4,8 +4,9 @@ TARGET ?= /kb/deployment
 SERVICE_SPEC = ServiceRegistry.spec
 SERVICE_NAME = ServiceRegistry
 SERVICE_DIR = registry
+SERVICE_PORT = 7070
 
-TPAGE_ARGS = --define kb_top=$(TARGET) --define kb_runtime=$(DEPLOY_RUNTIME) --define kb_service_name=$(SERVICE_NAME) --define kb_service_dir=$(SERVICE_DIR)
+TPAGE_ARGS = --define kb_top=$(TARGET) --define kb_runtime=$(DEPLOY_RUNTIME) --define kb_service_name=$(SERVICE_NAME) --define kb_service_dir=$(SERVICE_DIR) --define kb_service_port=$(SERVICE_PORT)
 
 include $(TOP_DIR)/tools/Makefile.common
 
