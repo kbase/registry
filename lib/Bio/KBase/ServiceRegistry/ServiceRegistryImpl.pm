@@ -130,12 +130,20 @@ sub register_service
     my $ctx = $Bio::KBase::ServiceRegistry::Service::CallContext;
     my($service_id);
     #BEGIN register_service
-
+        unless ($ctx->authenticated) {
+                my $msg = "Unauthenticated user attempt to call update_nginx";
+                Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+                                                               method_name => 'update_nginx');
+        }
     # validate args
-    defined $info->{'hostname'}   or die"no hostname in service info";
-    defined $info->{'service_name'} or die "no service_name in service info";
-    defined $info->{'port'}       or die "no port in service info";
-    defined $info->{'namespace'}  or die "no namespace in service info";
+    defined $info->{'hostname'}   or my $msg = "no hostname in service info";
+    defined $info->{'service_name'} or my $msg = "no service_name in service info";
+    defined $info->{'port'}       or my $msg = "no port in service info";
+    defined $info->{'namespace'}  or my $msg =  "no namespace in service info";
+    if (defined $msg and $msg) {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+                                            method_name => 'register_service');
+    }
 
     # convert service info to json doc
     my $json_text = to_json($info, {pretty=>1});
@@ -252,6 +260,27 @@ sub deregister_service
     my $ctx = $Bio::KBase::ServiceRegistry::Service::CallContext;
     my($success);
     #BEGIN deregister_service
+        unless ($ctx->authenticated) {
+                my $msg = "Unauthenticated user attempt to call update_nginx";
+                Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+                                                               method_name => 'update_nginx');
+        }
+	# validate service info object
+	
+	# delete service document from collection
+	my ($msg, $query);
+	$query->{hostname} = $info->{hostname} or $msg =  "hostname not defined in service info";
+	$query->{port} = $info->{port} or $msg =  "port not defined in service info";
+	$query->{service_name} = $info->{service_name} or $msg =  "service_name not defined in service info";
+	$query->{namespace} = $info->{namespace} or $msg =  "namespace not defined in service info";
+        if($msg) {
+        	Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+                                                               method_name => 'deregister_service');
+	}
+	my $collection = $self->{client}->get_database($cfg->{'mongodb-db'})->get_collection($cfg->{'mongodb-collection'});
+	$success = $collection->remove($query );
+
+
     #END deregister_service
     my @_bad_returns;
     (!ref($success)) or push(@_bad_returns, "Invalid type for return variable \"success\" (value was \"$success\")");
@@ -332,6 +361,12 @@ sub update_nginx
     my $ctx = $Bio::KBase::ServiceRegistry::Service::CallContext;
     my($success);
     #BEGIN update_nginx
+	unless ($ctx->authenticated) {
+		my $msg = "Unauthenticated user attempt to call update_nginx";
+		Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+                                                               method_name => 'update_nginx');
+	}
+
 	$success = 1;
     #END update_nginx
     my @_bad_returns;
@@ -425,6 +460,72 @@ sub enumerate_services
 	my $msg = "Invalid returns passed to enumerate_services:\n" . join("", map { "\t$_\n" } @_bad_returns);
 	Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
 							       method_name => 'enumerate_services');
+    }
+    return($return);
+}
+
+
+
+
+=head2 enumerate_service_urls
+
+  $return = $obj->enumerate_service_urls()
+
+=over 4
+
+=item Parameter and return types
+
+=begin html
+
+<pre>
+$return is a reference to a list where each element is a string
+
+</pre>
+
+=end html
+
+=begin text
+
+$return is a reference to a list where each element is a string
+
+
+=end text
+
+
+
+=item Description
+
+Provide a list of available service urls. The enumerate_service_urls
+returns the entire set of service urls that are registered in
+the registry.
+
+=back
+
+=cut
+
+sub enumerate_service_urls
+{
+    my $self = shift;
+
+    my $ctx = $Bio::KBase::ServiceRegistry::Service::CallContext;
+    my($return);
+    #BEGIN enumerate_service_urls
+	my $services = $self->enumerate_services();
+	foreach my $info (@$services) {
+		my $url = $info->{'hostname'} . ":" .
+		   $info->{'port'}            . "/" .
+		   $info->{'service_name'}   . "/" .
+		   $info->{'namespace'};
+
+		push @$return, $url;
+	}
+    #END enumerate_service_urls
+    my @_bad_returns;
+    (ref($return) eq 'ARRAY') or push(@_bad_returns, "Invalid type for return variable \"return\" (value was \"$return\")");
+    if (@_bad_returns) {
+	my $msg = "Invalid returns passed to enumerate_service_urls:\n" . join("", map { "\t$_\n" } @_bad_returns);
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+							       method_name => 'enumerate_service_urls');
     }
     return($return);
 }
