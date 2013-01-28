@@ -19,18 +19,20 @@ ServiceRegistry
 use MongoDB;
 use MongoDB::OID;
 use MongoDB::MongoClient;
-use Config::Simple;
+use Config::Simple ('-lc'); # ignoring case, don't save to file.
 use JSON -support_by_pp;
 
 # set package variables
 our $cfg = {};
 if (defined $ENV{KB_DEPLOYMENT_CONFIG} && -e $ENV{KB_DEPLOYMENT_CONFIG}) {
-    $cfg = new Config::Simple($ENV{KB_DEPLOYMENT_CONFIG});
+    $cfg = new Config::Simple($ENV{KB_DEPLOYMENT_CONFIG}) or
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error => Config::Simple->error(),
+                                                         method_name => 'new');
 }
 else {
-    $cfg->{'mongodb-host'} = 'mongodb.kbase.us';
-    $cfg->{'mongodb-db'}   = 'registry';
-    $cfg->{'mongodb-collection'} = 'test';
+    $cfg->param('registry.mongodb-host') = 'mongodb.kbase.us';
+    $cfg->param('registry.mongodb-db')   = 'registry';
+    $cfg->param('registry.mongodb-collection') = 'test';
 }
 #END_HEADER
 
