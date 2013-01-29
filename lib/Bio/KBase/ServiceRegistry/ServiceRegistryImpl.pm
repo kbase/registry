@@ -41,6 +41,8 @@ else {
     $cfg->param('registry.mongodb-host', 'mongodb.kbase.us');
     $cfg->param('registry.mongodb-db', 'registry');
     $cfg->param('registry.mongodb-collection', 'test');
+    $cfg->param('registry.service-host', '127.0.0.1');
+    $cfg->param('registry.service-port', '7070');
 }
 #END_HEADER
 
@@ -52,7 +54,7 @@ sub new
     bless $self, $class;
     #BEGIN_CONSTRUCTOR
     $self->{'client'} = 
-	MongoDB::MongoClient->new(host => $cfg->{'mongodb-host'});
+	MongoDB::MongoClient->new({host => $cfg->param('registry.mongodb-host')});
     #END_CONSTRUCTOR
 
     if ($self->can('_init_instance'))
@@ -160,8 +162,8 @@ sub register_service
 
 
     # get the mongo database collection
-    my $database = $self->{client}->get_database($cfg->{'mongodb-db'});
-    my $collection = $database->get_collection($cfg->{'mongodb-collection'});
+    my $database = $self->{client}->get_database($cfg->param('registry.mongodb-db'));
+    my $collection = $database->get_collection($cfg->param('registry.mongodb-collection'));
 
     # check to make sure this service is not already registered
     my $object = $collection->find_one({hostname => $info->{hostname},
@@ -285,7 +287,7 @@ sub deregister_service
         	Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
                                                                method_name => 'deregister_service');
 	}
-	my $collection = $self->{client}->get_database($cfg->{'mongodb-db'})->get_collection($cfg->{'mongodb-collection'});
+	my $collection = $self->{client}->get_database($cfg->param('registry.mongodb-db'))->get_collection($cfg->param('registry.mongodb-collection'));
 	$success = $collection->remove($query );
 
 
@@ -444,7 +446,7 @@ sub enumerate_services
     my $ctx = $Bio::KBase::ServiceRegistry::Service::CallContext;
     my($return);
     #BEGIN enumerate_services
-	my $collection = $self->{client}->get_database($cfg->{'mongodb-db'})->get_collection($cfg->{'mongodb-collection'});
+	my $collection = $self->{client}->get_database($cfg->param('registry.mongodb-db'))->get_collection($cfg->param('registry.mongodb-collection'));
 	my $cursor  = $collection->find();
 	while (my $object = $cursor->next()) {
 	
