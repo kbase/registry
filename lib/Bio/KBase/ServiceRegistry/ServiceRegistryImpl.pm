@@ -11,7 +11,12 @@ ServiceRegistry
 
 =head1 DESCRIPTION
 
-
+The service registry maintains a list of services and their
+url endpoints. The design assumes deploy time registration
+rather than runtime registration. The design assumes that
+clients can construct the url using a defined standard for
+service urls and therefor do not need to rely heavily on
+registry lookups at runtime.
 
 =cut
 
@@ -30,9 +35,12 @@ if (defined $ENV{KB_DEPLOYMENT_CONFIG} && -e $ENV{KB_DEPLOYMENT_CONFIG}) {
                                                          method_name => 'new');
 }
 else {
-    $cfg->param('registry.mongodb-host') = 'mongodb.kbase.us';
-    $cfg->param('registry.mongodb-db')   = 'registry';
-    $cfg->param('registry.mongodb-collection') = 'test';
+    $cfg = new Config::Simple(syntax=>'ini') or
+        Bio::KBase::Exceptions::ArgumentValidationError->throw(error => Config::Simple->error(),
+                                                         method_name => 'new'); 
+    $cfg->param('registry.mongodb-host', 'mongodb.kbase.us');
+    $cfg->param('registry.mongodb-db', 'registry');
+    $cfg->param('registry.mongodb-collection', 'test');
 }
 #END_HEADER
 
@@ -789,13 +797,18 @@ sub version {
 
 =item Description
 
-Information about a service such as it's name and it's 
+Information about a service such as its name and its 
 namespace are captured in the ServiceInfo structure.
 The keys and values in the structure are:
      service_name - holds a string that is the service name.
      namespace - holds a string that is an enumeration of the
                              different types of deployments, such as
                              prod, dev, test, etc.
+     hostname  - is the name of the host (or ip adress) that the 
+                     service is running on.
+     port      - is the port number that the service is listening on.
+     ip_allows - is a list of IP addresses that should be allowed
+                     to connect to this service. The default is all.
 
 
 =item Definition
