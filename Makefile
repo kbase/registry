@@ -3,7 +3,6 @@ DEPLOY_RUNTIME ?= /kb/runtime
 TARGET ?= /kb/deployment
 SERVICE_SPEC = ServiceRegistry.spec
 SERVICE_NAME = ServiceRegistry
-SERVICE_DIR = registry
 SERVICE_PORT = 7070
 
 TPAGE_ARGS = --define kb_top=$(TARGET) --define kb_runtime=$(DEPLOY_RUNTIME) --define kb_service_name=$(SERVICE_NAME) --define kb_service_dir=$(SERVICE_DIR) --define kb_service_port=$(SERVICE_PORT)
@@ -13,6 +12,7 @@ include $(TOP_DIR)/tools/Makefile.common
 # to wrap scripts and deploy them to $(TARGET)/bin using tools in
 # the dev_container. right now, these vars are defined in
 # Makefile.common, so it's redundant here.
+SERVICE_DIR = registry
 TOOLS_DIR = $(TOP_DIR)/tools
 WRAP_PERL_TOOL = wrap_perl
 WRAP_PERL_SCRIPT = bash $(TOOLS_DIR)/$(WRAP_PERL_TOOL).sh
@@ -194,10 +194,11 @@ deploy-scripts:
 # The start server script needs to know the service port and needs
 # to set the $KB_DEPLOYMENT_CONFIG environment variable.
 deploy-service:
-	$(TPAGE) $(TPAGE_ARGS) service/start_service.tt > $(TARGET)/services/$(SERVICE)/start_service
-	chmod +x $(TARGET)/services/$(SERVICE)/start_service
-	$(TPAGE) $(TPAGE_ARGS) service/stop_service.tt > $(TARGET)/services/$(SERVICE)/stop_service
-	chmod +x $(TARGET)/services/$(SERVICE)/stop_service
+	mkdir -p $(TARGET)/services/$(SERVICE_DIR)
+	$(TPAGE) $(TPAGE_ARGS) service/start_service.tt > $(TARGET)/services/$(SERVICE_DIR)/start_service
+	chmod +x $(TARGET)/services/$(SERVICE_DIR)/start_service
+	$(TPAGE) $(TPAGE_ARGS) service/stop_service.tt > $(TARGET)/services/$(SERVICE_DIR)/stop_service
+	chmod +x $(TARGET)/services/$(SERVICE_DIR)/stop_service
 	echo "done executing deploy-service target"
 
 # Deploying docs here refers to the deployment of documentation
@@ -206,8 +207,8 @@ deploy-service:
 # how to standardize and automate CLI documentation.
 
 deploy-docs: build-docs
-	-mkdir -p $(TARGET)/services/$(SERVICE_DIR)/webroot/.
-	cp docs/*.html $(TARGET)/services/$(SERVICE_DIR)/webroot/.
+	-mkdir -p $(SERVICE_DIR)/webroot/.
+	cp docs/*.html $(SERVICE_DIR)/webroot/.
 
 # The location of the Client.pm file depends on the --client param
 # that is provided to the compile_typespec command. The
