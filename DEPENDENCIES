@@ -1,2 +1,9 @@
+# This file contains kbase dependencies. Both compile time
+# and runtime dependencies. The first column is the name
+# of the git repository of the dependency, the second column
+# is a tag on the master branch of the repository. NOTE:
+# columns MUST BE tab separated (not spaces and only one tab).
+# (we'll fix this in the future)
 typecomp	01072013-test
-kb_seed		01072013-test
+kb_seed	01072013-test
+auth	01222013-test
