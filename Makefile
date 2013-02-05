@@ -4,6 +4,7 @@ TARGET ?= /kb/deployment
 SERVICE_SPEC = ServiceRegistry.spec
 SERVICE_NAME = ServiceRegistry
 SERVICE_PORT = 7070
+SERVICE_DIR = registry
 
 TPAGE_ARGS = --define kb_top=$(TARGET) --define kb_runtime=$(DEPLOY_RUNTIME) --define kb_service_name=$(SERVICE_NAME) --define kb_service_dir=$(SERVICE_DIR) --define kb_service_port=$(SERVICE_PORT)
 
@@ -207,8 +208,8 @@ deploy-service:
 # how to standardize and automate CLI documentation.
 
 deploy-docs: build-docs
-	-mkdir -p $(SERVICE_DIR)/webroot/.
-	cp docs/*.html $(SERVICE_DIR)/webroot/.
+	-mkdir -p $(TARGET)/services/registry/webroot/.
+	cp docs/*.html $(TARGET)/services/registry/webroot/.
 
 # The location of the Client.pm file depends on the --client param
 # that is provided to the compile_typespec command. The
