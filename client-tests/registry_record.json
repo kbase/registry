@@ -1,0 +1,12 @@
+{
+		"idd": "Some type def doc",
+		"service_name": "ServiceRegistry",
+		"namespace": "test",
+		"hostname": "127.0.0.1" 
+		"port": "7070"
+		"ip_allows": [ 
+				{"ip_address": "login1.kbase.us"},
+				{"ip_address": "login2.kbase.us"},
+				{"ip_address": "login3.kbase.us"}
+			     ]
+}
