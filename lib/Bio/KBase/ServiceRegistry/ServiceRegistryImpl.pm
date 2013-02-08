@@ -38,7 +38,7 @@ else {
     $cfg = new Config::Simple(syntax=>'ini') or
         Bio::KBase::Exceptions::ArgumentValidationError->throw(error => Config::Simple->error(),
                                                          method_name => 'new'); 
-    $cfg->param('registry.mongodb-host', 'mongodb.kbase.us');
+    $cfg->param('registry.mongodb-host', 'localhost');
     $cfg->param('registry.mongodb-db', 'registry');
     $cfg->param('registry.mongodb-collection', 'test');
     $cfg->param('registry.service-host', '127.0.0.1');
@@ -270,25 +270,30 @@ sub deregister_service
     my $ctx = $Bio::KBase::ServiceRegistry::Service::CallContext;
     my($success);
     #BEGIN deregister_service
-        unless ($ctx->authenticated) {
-                my $msg = "Unauthenticated user attempt to call update_nginx";
-                Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
-                                                               method_name => 'update_nginx');
+    unless ($ctx->authenticated) {
+	my $msg = "Unauthenticated user attempt to call update_nginx";
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+                                               method_name => 'update_nginx');
         }
-	# validate service info object
-	
-	# delete service document from collection
-	my ($msg, $query);
-	$query->{hostname} = $info->{hostname} or $msg =  "hostname not defined in service info";
-	$query->{port} = $info->{port} or $msg =  "port not defined in service info";
-	$query->{service_name} = $info->{service_name} or $msg =  "service_name not defined in service info";
-	$query->{namespace} = $info->{namespace} or $msg =  "namespace not defined in service info";
-        if($msg) {
-        	Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
-                                                               method_name => 'deregister_service');
-	}
-	my $collection = $self->{client}->get_database($cfg->param('registry.mongodb-db'))->get_collection($cfg->param('registry.mongodb-collection'));
-	$success = $collection->remove($query );
+    # validate service info object
+    
+    # delete service document from collection
+    my ($msg, $query);
+    $query->{hostname} = $info->{hostname} or
+	$msg =  "hostname not defined in service info";
+    $query->{port} = $info->{port} or
+	$msg =  "port not defined in service info";
+    $query->{service_name} = $info->{service_name} or
+	$msg =  "service_name not defined in service info";
+    $query->{namespace} = $info->{namespace} or
+	$msg =  "namespace not defined in service info";
+    if($msg) {
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
+                                        method_name => 'deregister_service');
+    }
+
+    my $collection = $self->{client}->get_database($cfg->param('registry.mongodb-db'))->get_collection($cfg->param('registry.mongodb-collection'));
+    $success = $collection->remove($query);
 
 
     #END deregister_service
