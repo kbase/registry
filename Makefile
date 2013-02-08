@@ -54,6 +54,7 @@ SERVER_TESTS = $(wildcard server-tests/*.t)
 
 
 default:
+	echo "nothing to do for default"
 
 # Test Section
 
