@@ -57,42 +57,42 @@ module ServiceRegistry {
     funcdef deregister_service(ServiceInfo info) returns(int success) authentication required;
     
     /* Update the nginx conf file. This function should be considered
-	   private in so far as it would only be called from the 
-	   register_service and deregister_service.
+	private in so far as it would only be called from the 
+	register_service and deregister_service.
     */
 	funcdef update_nginx(ServiceInfo info) returns(int success) authentication required;
 
-	/* Provide a list of available services. The enumerate_services
-	   simply returns the entire set of services that are available.
-	*/
-	funcdef enumerate_services() returns(list<ServiceInfo>);
+    /* Provide a list of available services. The enumerate_services
+       simply returns the entire set of services that are available.
+    */
+    funcdef enumerate_services() returns(list<ServiceInfo>);
 
-	/* Provide a list of available service urls. The enumerate_service_urls
-	   returns the entire set of service urls that are registered in
-	   the registry.
-	*/
-	funcdef enumerate_service_urls() returns (list<string>);
+    /* Provide a list of available service urls. The enumerate_service_urls
+       returns the entire set of service urls that are registered in
+       the registry. The url will contain the port.
+    */
+    funcdef enumerate_service_urls() returns (list<string>);
 
-	/* Get the interface description document for the service. The
-           get_service_specification returns a string that represents the
-           interface specification for the given service.
-	*/
-	funcdef get_service_specification(string service_name, string namespace) returns(string specification);
-
-
-
-	/* These methods deal with service availability. */
-
-	/* Is the service alive. The is_alive function will only verify that
-	   the end-point can be reached over the WAN.
-	*/
-	funcdef is_alive(string service_name, string namespace) returns(int alive) authentication optional;
+    /* Get the interface description document for the service. The
+       get_service_specification returns a string that represents the
+       interface specification for the given service.
+    */
+    funcdef get_service_specification(string service_name, string namespace) returns(string specification);
 
 
-	/*  Get the seconds remaining until the service registration expires.
 
-	*/
-	funcdef get_expiration_interval(string service_name, string namespace) returns(int seconds_before_service_expiration);
+    /* These methods deal with service availability. */
+
+    /* Is the service alive. The is_alive function will only verify that
+       the end-point can be reached over the WAN. The service_url must include
+       the port (protocol://hosthame:port). If no protocol is provided, then
+       http is assumed.
+    */
+    funcdef is_alive(string service_url) returns(int alive) authentication optional;
+
+
+    /* Get the seconds remaining until the service registration expires. */
+    funcdef get_expiration_interval(string service_name, string namespace) returns(int seconds_before_service_expiration);
 
 };
 
