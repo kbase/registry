@@ -1,0 +1,3 @@
+use Bio::KBase::ServiceRegistry::ServiceRegistryImpl;
+$c=Bio::KBase::ServiceRegistry::ServiceRegistryImpl->new();
+$c->is_alive("http://kbase.us/services/ontology");
