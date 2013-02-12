@@ -14,12 +14,26 @@ else {
     $cfg = new Config::Simple(syntax=>'ini') or
         die "could not create config object ",
 		Config::Simple->error();
-    $cfg->param('registry.mongodb-host', 'mongodb.kbase.us');
+    $cfg->param('registry.mongodb-host', '127.0.0.1');
+    $cfg->param('registry.mongodb-port', 27017);
     $cfg->param('registry.mongodb-db', 'registry');
     $cfg->param('registry.mongodb-collection', 'test');
     $cfg->param('registry.service-host', '127.0.0.1');
     $cfg->param('registry.service-port', '7070');
 }
+
+# ping the running mongo server to test the service dependency
+
+print "\nchecking for running mongod on ",
+        $cfg->param('registry.mongodb-host'), ":",
+        $cfg->param('registry.mongodb-port'), "\n";
+
+
+die "error $@" unless $sock = IO::Socket::INET->new(PeerPort  => $cfg->param('registry.mongodb-port'),
+                                      PeerAddr  => $cfg->param('registry.mongodb-host'),
+                                      Proto     => tcp,
+                                );
+
 
 # ping the running server as we need a running server to test the client against
 
@@ -32,6 +46,7 @@ die "error $@" unless
                                  PeerAddr  => $cfg->param('registry.service-host'),
                                  Proto     => tcp,
 				);    
+
 
 print "\nlooks good\n";
 
@@ -59,6 +74,7 @@ ok( $at = Bio::KBase::AuthToken->new('user_id' => 'kbasetest', 'password' => '@S
 ok($at->validate(), "Validating token from kbasetest username/password");
 $ENV{'KB_AUTH_TOKEN'} = $at->token;
 
+# run some functional tests
 ok(register_service1(), "registering a service");
 ok(register_service2(), "registering a service");
 ok("ARRAY" eq ref( enumerate_services1()), "enumerating services");
@@ -66,7 +82,12 @@ ok(0 < enumerate_services2(), "enumerating services");
 ok(1 == enumerate_service_urls1(), "enumerating service urls");
 ok(deregister_service1(), "deregistering a service");
 
+# finish testing
 done_testing;
+
+# shut mongo server down if we started on on localhost
+mongo_down if($LOCAL_MONGO);
+ 
 
 sub deregister_service1 {
 
@@ -145,3 +166,4 @@ sub register_service2 {
 	}
 	return 1;
 }
+
