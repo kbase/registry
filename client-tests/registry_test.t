@@ -46,5 +46,102 @@ can_ok('Bio::KBase::ServiceRegistry::Client', 'is_alive');
 can_ok('Bio::KBase::ServiceRegistry::Client', 'get_expiration_interval');
 
 
-done_testing();
+print "\nconnecting to service\n";
 
+
+use Bio::KBase::ServiceRegistry::Client;
+use Bio::KBase::AuthToken;
+our $service_url = "http://localhost:7070";
+
+# make sure we can get a token from the Auth client
+ok( $at = Bio::KBase::AuthToken->new('user_id' => 'kbasetest', 'password' => '@Suite525'),
+    "Acquiring kbasetest user token using username/password");
+ok($at->validate(), "Validating token from kbasetest username/password");
+$ENV{'KB_AUTH_TOKEN'} = $at->token;
+
+ok(register_service1(), "registering a service");
+ok(register_service2(), "registering a service");
+ok("ARRAY" eq ref( enumerate_services1()), "enumerating services");
+ok(0 < enumerate_services2(), "enumerating services");
+ok(1 == enumerate_service_urls1(), "enumerating service urls");
+ok(deregister_service1(), "deregistering a service");
+
+done_testing;
+
+sub deregister_service1 {
+
+	$query = {
+	   "service_name" => "registry",
+	   "namespace" => "test",
+	   "hostname" => "localhost",
+	   "port" => 1097
+	};
+
+	$s = Bio::KBase::ServiceRegistry::Client->new($service_url);
+	$rv = $s->deregister_service($query);
+	return $rv;
+}
+
+sub enumerate_services1 {
+	$s = Bio::KBase::ServiceRegistry::Client->new($service_url);
+	$objs = $s->enumerate_services();
+	return $objs;
+}
+
+sub enumerate_services2 {
+	my $services;
+	my $s = Bio::KBase::ServiceRegistry::Client->new($service_url);
+	my $objs = $s->enumerate_services();
+	foreach $info (@$objs) {
+		print "\n";
+		print "$_: $info->{$_}\n" foreach keys %$info;
+		$services++;
+	}
+	return $services;
+}
+
+sub enumerate_service_urls1 {
+	my $services;
+	my $s = Bio::KBase::ServiceRegistry::Client->new($service_url);
+	my $objs = $s->enumerate_service_urls();
+	foreach $url (@$objs) {
+		print $url, "\n";
+		$services++;
+	}
+	return $services;
+}
+
+sub register_service1 {
+	my $s = Bio::KBase::ServiceRegistry::Client->new($service_url);
+	my $query = {
+	   "service_name" => "registry",
+	   "hostname" => "localhost",
+	   "port" => 1097
+	};
+        # This should fail because namespace is not defined
+	eval {
+		$s->register_service($query);
+	};
+	if($@) {
+		return 1;
+	}
+	return 0;
+}
+sub register_service2 {
+	my $query = {
+	   "service_name" => "registry",
+	   "namespace" => "test",
+	   "hostname" => "localhost",
+	   "port" => 1097
+
+	};
+	my $s = Bio::KBase::ServiceRegistry::Client->new($service_url);
+	eval {
+		$s->register_service($query);
+	};
+	if($@) {
+		print $@;
+		return 0;
+	}
+	return 1;
+}
