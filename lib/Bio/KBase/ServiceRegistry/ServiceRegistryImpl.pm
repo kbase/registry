@@ -21,11 +21,21 @@ registry lookups at runtime.
 =cut
 
 #BEGIN_HEADER
+# set up logging
+use Log::Message::Simple qw(msg error debug);
+local $Log::Message::Simple::MSG_FH = \*STDERR;
+local $Log::Message::Simple::ERROR_FH = \*STDERR;
+local $Log::Message::Simple::DEBUG_FH = \*STDERR;
+our $verbose = 1;
+
 use MongoDB;
 use MongoDB::OID;
 use MongoDB::MongoClient;
 use Config::Simple ('-lc'); # ignoring case, don't save to file.
 use JSON -support_by_pp;
+use Data::Dumper;
+require LWP::UserAgent;
+
 
 # set package variables
 our $cfg = {};
@@ -451,6 +461,7 @@ sub enumerate_services
     my $ctx = $Bio::KBase::ServiceRegistry::Service::CallContext;
     my($return);
     #BEGIN enumerate_services
+	$return = [];
 	my $collection = $self->{client}->get_database($cfg->param('registry.mongodb-db'))->get_collection($cfg->param('registry.mongodb-collection'));
 	my $cursor  = $collection->find();
 	while (my $object = $cursor->next()) {
@@ -512,7 +523,7 @@ $return is a reference to a list where each element is a string
 
 Provide a list of available service urls. The enumerate_service_urls
 returns the entire set of service urls that are registered in
-the registry.
+the registry. The url will contain the port.
 
 =back
 
@@ -621,7 +632,7 @@ sub get_service_specification
 
 =head2 is_alive
 
-  $alive = $obj->is_alive($service_name, $namespace)
+  $alive = $obj->is_alive($service_url)
 
 =over 4
 
@@ -630,8 +641,7 @@ sub get_service_specification
 =begin html
 
 <pre>
-$service_name is a string
-$namespace is a string
+$service_url is a string
 $alive is an int
 
 </pre>
@@ -640,8 +650,7 @@ $alive is an int
 
 =begin text
 
-$service_name is a string
-$namespace is a string
+$service_url is a string
 $alive is an int
 
 
@@ -652,7 +661,9 @@ $alive is an int
 =item Description
 
 Is the service alive. The is_alive function will only verify that
-the end-point can be reached over the WAN.
+the end-point can be reached over the WAN. The service_url must include
+the port (protocol://hosthame:port). If no protocol is provided, then
+http is assumed.
 
 =back
 
@@ -661,11 +672,10 @@ the end-point can be reached over the WAN.
 sub is_alive
 {
     my $self = shift;
-    my($service_name, $namespace) = @_;
+    my($service_url) = @_;
 
     my @_bad_arguments;
-    (!ref($service_name)) or push(@_bad_arguments, "Invalid type for argument \"service_name\" (value was \"$service_name\")");
-    (!ref($namespace)) or push(@_bad_arguments, "Invalid type for argument \"namespace\" (value was \"$namespace\")");
+    (!ref($service_url)) or push(@_bad_arguments, "Invalid type for argument \"service_url\" (value was \"$service_url\")");
     if (@_bad_arguments) {
 	my $msg = "Invalid arguments passed to is_alive:\n" . join("", map { "\t$_\n" } @_bad_arguments);
 	Bio::KBase::Exceptions::ArgumentValidationError->throw(error => $msg,
@@ -675,6 +685,38 @@ sub is_alive
     my $ctx = $Bio::KBase::ServiceRegistry::Service::CallContext;
     my($alive);
     #BEGIN is_alive
+
+	my $ua = LWP::UserAgent->new();
+	$ua->timeout(10);
+	my $response = $ua->get($service_url);
+	my $rv = 0;
+	
+	# if we get to the server, is_success should not be true because a valid post payload
+	# was not sent, so we assume the service is unreachable, I don't like this but works
+	# for now.
+	if ($response->is_success) {
+		msg( "Response decoded content: " . $response->decoded_content . "\n", $verbose );
+	}
+	else {
+		msg( "Response status: " . $response->status_line . "\n", $verbose);
+		msg( "Response decoded content: " . $response->decoded_content . "\n", $verbose);
+		my $ref;
+		# we should get a valid json object back, it's a json rpc doc with the error
+		# string set in the json payload. So for the service to be up, we need to
+		# get back a valid json doc.
+		eval { $ref = from_json($response->decoded_content) };
+		if ($@) {
+			msg( "Did not get parsable JSON when querying $service_url" );
+		}
+		else {
+			$rv = 1 if defined $ref->{'version'} and defined $ref->{'error'};
+			msg( Dumper $ref, $verbose);
+		}
+	}
+	msg( "alive is set to $rv", $verbose );
+	$alive = $rv;
+
+
     #END is_alive
     my @_bad_returns;
     (!ref($alive)) or push(@_bad_returns, "Invalid type for return variable \"alive\" (value was \"$alive\")");
