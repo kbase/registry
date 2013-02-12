@@ -16,7 +16,26 @@ GetOptions('h'              => \$help,
     ) or pod2usage(2);
 pod2usage(-exitstatus => 0, -verbose => 2) if $help or $man;
 
-my $r = Bio::KBase::ServiceRegistry::Client();
+# set package variables
+our $cfg = {};
+if (defined $ENV{KB_DEPLOYMENT_CONFIG} && -e $ENV{KB_DEPLOYMENT_CONFIG}) {
+    $cfg = new Config::Simple($ENV{KB_DEPLOYMENT_CONFIG}) or
+	Bio::KBase::Exceptions::ArgumentValidationError->throw(error => Config::Simple->error(),
+                                                         method_name => 'new');
+}
+else {
+    $cfg = new Config::Simple(syntax=>'ini') or
+        Bio::KBase::Exceptions::ArgumentValidationError->throw(error => Config::Simple->error(),
+                                                         method_name => 'new'); 
+    $cfg->param('registry.mongodb-host', 'localhost');
+    $cfg->param('registry.mongodb-db', 'registry');
+    $cfg->param('registry.mongodb-collection', 'test');
+    $cfg->param('registry.service-host', '127.0.0.1');
+    $cfg->param('registry.service-port', '7070');
+}
+my $service_url = "http://" . $cfg->param('registry.service-host') . ":" .
+	$cfg->param('registry.service-port');
+my $r = Bio::KBase::ServiceRegistry::Client->new($service_url);
 my $services = $r->enumerate_services();
 foreach my $service_info (@$services) {
   print Dumper $service_info;
