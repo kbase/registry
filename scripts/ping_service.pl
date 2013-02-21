@@ -23,7 +23,7 @@ pod2usage(-msg => "no service url provided",
 # does it have a protocol
 # does it have a port number
 
-my $r = Bio::KBase::ServiceRegistry::Client();
+my $r = Bio::KBase::ServiceRegistry::Client->new();
 my $services = $r->is_alive($url);
 foreach my $result (@$services) {
   print $result, "\n";
