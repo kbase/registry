@@ -8,6 +8,8 @@ use Pod::Usage;
 
 my $man  = 0;
 my $help = 0;
+my $url = "";
+
 GetOptions('h'              => \$help,
 	   'help'           => \$help,
 	   'man'            => \$man,
