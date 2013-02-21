@@ -1,0 +1,11 @@
+{
+	"idd":          "module MyModulexx",
+	"service_name": "MyService",
+	"namespace":    "test",
+	"hostname":     "registry.kbase.us",
+	"port":         "4444",
+	"ip_allows": [
+				"ip_address": "127.0.0.1",
+				"ip_address": "192.168.1.12"
+			     ]
+}

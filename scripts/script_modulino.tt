@@ -1,0 +1,70 @@
+package [% kb_method_name %];
+__PACKAGE__->run(@ARGV ) unless caller();
+
+# if run as a script, then @ARGV has the params
+# if run as a module, then @_ has the params
+sub run {
+	shift @_ if $_[0] eq __PACKAGE__;
+
+	use strict;
+	use [% kb_client %];
+	use Getopt::Long qw(GetOptionsFromArray);  # use @_ instead of @ARGV
+	use Pod::Find qw(pod_where);		   # find pod in this module
+	use Pod::Usage;
+
+	my $man  = 0;
+	my $help = 0;
+	GetOptionsFromArray(\@_,
+		'h'	=> \$help,
+		'help'	=> \$help,
+		'man'	=> \$man,
+	) or pod2usage(0);
+	pod2usage(-exitstatus => 0,
+		  -output => \*STDOUT,
+		  -verbose => 2,
+		  -noperldoc => 1,
+		  -input => pod_where({-inc => -1}, __PACKAGE__)
+		 ) if $help or $man;
+
+	# do a little validation on the parameters
+
+
+	# main logic
+	my $r = [% kb_client %]->new();
+
+}
+
+=pod
+
+=head1	NAME
+
+[% kb_method_name %]
+
+=head1	SYNOPSIS
+
+=over
+
+=item [% kb_method_name %] -h, --help, or --man
+
+=back
+
+=head1	DESCRIPTION
+
+The publish service calles the [% kb_method_name %] method of a [% kb_client %] object.
+
+=head1	COMMAND-LINE OPTIONS
+
+=over
+
+=item	-h, --help, --man  This documentation
+
+=back
+
+=head1	AUTHORS
+
+[% kb_author %]
+
+=cut
+
+1;
+
