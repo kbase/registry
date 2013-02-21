@@ -23,34 +23,33 @@ pod2usage(-msg => "no service url provided",
 # does it have a protocol
 # does it have a port number
 
-my $r = Bio::KBase::ServiceRegistry::Client->new();
-my $services = $r->is_alive($url);
-foreach my $result (@$services) {
-  print $result, "\n";
-}
+my $r = Bio::KBase::ServiceRegistry::Client->new("http://localhost:7070");
+my $result = $r->is_alive($url);
+print $result, "\n";
 
 =pod
 
 =head1	NAME
 
-enumerate_service_urls
+is_alive
 
 =head1	SYNOPSIS
 
-enumerate_service_urls
-enumerate_service_urls --help
+is_alive --url "http://kbase.us/services/ontology_service"
+is_alive --help
 
 =head1	DESCRIPTION
 
-The enumerate_service_urls prints out the list of registered service urls
-as those urls appear in the service registry. Some consideration is needed
-in considering a proxy and redirects if they exist.
+The is_alive script prints out to STDOUT the return value of the is_alive
+function. This is a boolean, 0 or 1. 
 
 =head1	COMMAND-LINE OPTIONS
 
 =over
 
 =item	-h, --help, --man  This documentation
+
+=item   --url The url of the service to check.
 
 =back
 
