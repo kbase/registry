@@ -242,6 +242,7 @@ build-libs:
 		--client Bio::KBase::$(SERVICE_NAME)::Client \
 		--py biokbase/$(SERVICE_NAME)/Client \
 		--js javascript/$(SERVICE_NAME)/Client \
+		--url http://kbase.us/services/service_registry
 		$(SERVICE_SPEC) lib
 
 	-rm -r Bio
