@@ -1,4 +1,3 @@
-#!/usr/bin/perl
 # get the list of service urls
 # every 5 seconds
 #   foreach url
@@ -49,7 +48,10 @@ while(1) {
 	my $command = "curl -o /dev/null -s ";
 	$command .= join (" ", @special_params) if @special_params;
 	$command .= " -d '$data' " if defined $data and $data;
-	$command .= " -w '%{time_connect}-%{time_starttransfer}-%{time_total}-%{http_code}-%{url_effective}' ";
+	$command .= " -w '%{time_total}-";
+	$command .= "%{time_pretransfer}-";
+	$command .= "%{time_starttransfer}-";
+	$command .= "%{http_code}' ";
 	$command .= $url;
 	print LOG $command, "\n";
 	
@@ -60,25 +62,39 @@ while(1) {
 	}
 
 	my @d = split/\-/, $r;
-	
-	push @{$h->{$url}->{Time_Connect}},  $d[0];
-	push @{$h->{$url}->{Time_startTransfer}}, $d[1];
-	push @{$h->{$url}->{Time_total}}, $d[2];
-	push @{$h->{$url}->{Http_code}}, $d[3];
-	push @{$h->{$url}->{Url_effective}},  $d[4];
+	die "did not get full data set, ", join(", ", @d), "\n" unless @d == 4;	
+	push @{$h->{$url}->{time_total}},          $d[0];
+	push @{$h->{$url}->{time_pretransfer}},    $d[1];
+	push @{$h->{$url}->{time_starttransfer}},  $d[2];
+	push @{$h->{$url}->{http_code}},           $d[3];
 	
     }
 
     $term->Tputs('cl', 1, *STDOUT);
-    printf('%1$-50s %2$9s %3$12s %4$6s %5$6s %6$6s %7$8s',
+    printf('%1$-52s %2$6s %3$6s %4$6s %5$6s %6$6s %7$6s %8$6s %9$6s',
 	   "Service",
-	   "Http_code",
-	   "Time_total",
+	   "Code",
+	   "Pre",
+           "Start",
+	   "Total",
 	   "Min",
 	   "Max",
 	   "Mean",
-	   "StdDev"
+	   "Dev"
 	);
+	print "\n";
+	printf('%1$-52s %2$6s %3$6s %4$6s %5$6s %6$6s %7$6s %8$6s %9$6s',
+           "-------",
+           "------",
+           "------",
+           "------",
+           "------",
+           "------",
+           "------",
+           "------",
+           "------"
+        );
+
     print "\n";
 
     foreach $entry (@entries) {
@@ -88,17 +104,19 @@ while(1) {
 
 	my $service = $1 if $url =~ /\/([\w\-_]+)\/*$/;
 	$stat = Statistics::Descriptive::Sparse->new();
-	$stat->add_data(@{$h->{$url}->{Time_total}});
+	$stat->add_data(@{$h->{$url}->{time_total}});
 
-	if (abs($h->{$url}->{Time_total}->[-1] - $stat->mean()) > 
+	if (abs($h->{$url}->{time_total}->[-1] - $stat->mean()) > 
 	    1.5 * $stat->standard_deviation()) {
 	    print color 'red';
 	}
 
-	printf ('%1$-50s %2$9s %3$12.3f %4$6.3f %5$6.3f %6$6.3f %7$8.3f', 
+	printf ('%1$-52s %2$6s %3$6.3f %4$6.3f %5$6.3f %6$6.3f %7$6.3f %8$6.3f %9$6.3f', 
 		$url,
-		$h->{$url}->{Http_code}->[-1],
-		$h->{$url}->{Time_total}->[-1], 
+		$h->{$url}->{http_code}->[-1],
+		$h->{$url}->{time_pretransfer}->[-1],
+		$h->{$url}->{time_starttransfer}->[-1],
+		$h->{$url}->{time_total}->[-1], 
 		$stat->min(), 
 		$stat->max(),
 		$stat->mean(),
