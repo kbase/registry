@@ -20,7 +20,7 @@ http://kbase.us/services/translation	{"params":[["kb|g.1870.peg.3069"]],"method"
 http://kbase.us/services/trees		{"params":["(a,b,c);"],"method":"Tree.get_leaf_count","version":"1.1"}
 http://kbase.us/services/trees		{"params":[["kb|tree.0"]],"method":"Tree.get_tree_data","version":"1.1"}
 http://bio-data-1.mcs.anl.gov/services/fba_gapfill	{"version":"1.1", "method":"workspaceService.get_types", "params":[]}
-http://bio-data-1.mcs.anl.gov/services/fba	{"version":"1.1", "method":"fbaModelServices.check_job", "params":[["jobid","0BD0CA04-66C9-11E2-B2C5-C2E06F82D26"]]}
+http://bio-data-1.mcs.anl.gov/services/fba	{"params":[{"jobid":"0BD0CA04-66C9-11E2-B2C5-C2E06F82D26"}],"version":"1.1","method":"fbaModelServices.check_job"}
 http://kbase.us/services/workspace	{"version":"1.1", "method":"workspaceService.get_types", "params":[]}
 http://kbase.us/services/workspace_service	{"version":"1.1", "method":"workspaceService.get_types", "params":[]}
 #
