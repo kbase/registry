@@ -1,1 +1,1 @@
-tpage --define kb_client=Bio::KBase::fbaModelServices::Client --define kb_method_name=check_job  wire_dump.tt
+tpage --define kb_client=Bio::KBase::OntoogyService::Client --define kb_method_name=get_go_description  wire_dump.tt
