@@ -1,0 +1,1 @@
+tpage --define kb_client=Bio::KBase::fbaModelServices::Client --define kb_method_name=check_job  wire_dump.tt
