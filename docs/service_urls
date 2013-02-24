@@ -15,7 +15,18 @@ http://kbase.us/services/idserver/	{"params":[["kb|g.0"]],"version":"1.1","metho
 http://kbase.us/services/cdmi_api/	{"params":[["kb|g.0"],["scientific_name"]],"version":"1.1","method":"CDMI_EntityAPI.get_entity_Genome"}
 http://bio-data-1.mcs.anl.gov/services/cdmi_api/	{"params":[["kb|g.0"],["scientific_name"]],"version":"1.1","method":"CDMI_EntityAPI.get_entity_Genome"}
 http://kbase.us/services/networks	{"params":["kb|g.3899.locus.10"],"method":"KBaseNetworks.entity2Datasets","version":"1.1"}
+http://kbase.us/services/ontology/	{"params":[["GO:0006979","GO:0055114"]],"version":"1.1","method":"Ontology.get_go_description"}
+http://kbase.us/services/ontology_service	{"params":[["GO:0006979","GO:0055114"]],"version":"1.1","method":"Ontology.get_go_description"}
+http://kbase.us/services/ontology_service/	{"params":[["GO:0006979","GO:0055114"]],"version":"1.1","method":"Ontology.get_go_description"}
 http://kbase.us/services/protein_info_service/	{"params":[["kb|g.1870.peg.3069"]],"method":"ProteinInfo.fids_to_operons","version":"1.1"}
+http://kbase.us/services/plant_expression_service/	{"params":[],"version":"1.1","method":"PlantExpression.get_all_po"}
+http://kbase.us/services/plant_expression_service	{"params":[],"version":"1.1","method":"PlantExpression.get_all_po"}
+http://kbase.us/services/plant_expression/	{"params":[],"version":"1.1","method":"PlantExpression.get_all_po"}
+http://kbase.us/services/plant_expression	{"params":[],"version":"1.1","method":"PlantExpression.get_all_po"}
+http://kbase.us/services/prom	{"params":[],"method":"PROM.version","version":"1.1"}
+http://kbase.us/services/prom/	{"params":[],"method":"PROM.version","version":"1.1"}
+http://140.221.84.235:7069	{"params":[],"method":"PROM.version","version":"1.1"}
+http://140.221.84.235:7069/	{"params":[],"method":"PROM.version","version":"1.1"}
 http://kbase.us/services/translation/	{"params":[["kb|g.1870.peg.3069"]],"method":"MOTranslation.fids_to_moLocusIds","version":"1.1"}
 http://kbase.us/services/trees/		{"params":["(a,b,c);"],"method":"Tree.get_leaf_count","version":"1.1"}
 http://kbase.us/services/trees/		{"params":[["kb|tree.0"]],"method":"Tree.get_tree_data","version":"1.1"}
@@ -29,7 +40,7 @@ http://kbase.us/services/workspace_service/	{"version":"1.1", "method":"workspac
 # https://kbase.us/services/cluster_service/
 # http://kbase.us/services/shock-api/
 # http://kbase.us/services/authorization/Sessions/
-# curl -X GET 140.221.84.124:8000/user/cbun/job/status
+http://140.221.84.124:8000/user/cbun/job/status
 #
 # curl -s -d '{"params":[""],"method":"","version":"1.1"}' http://kbase.us/services/ontology_service/
 # curl -s -d '{"params":[""],"method":"","version":"1.1"}' http://kbase.us/services/operon_service/
