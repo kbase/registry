@@ -1,0 +1,57 @@
+# service url [tab] json payload for POST, if no jason payload provided
+# then a GET is assumed. Delimiter must be one or more tabs.
+#
+http://kbase.us/services/communities_qc/	{"id":"1","params":[{"id":"kb|mg.1"}],"method":"get_drisee_instance","version":"1.1"}
+http://kbase.us/services/communities/	{"id":"1","params":[{"id":"mgm4440026.3"}],"method":"get_metagenome_instance","version":"1.1"}	-L
+http://kbase.us/services/erdb_service/	{"params":["Genome", "Genome(id) = ?", ["kb|g.0"], "Genome(scientific-name)", 0],"method":"ERDB_Service.GetAll","version":"1.1"}
+http://kbase.us/services/experiment/	{"params":[["kb|cpd.0"]],"method":"Experiment.getChildCompounds","version":"1.1", "id":1251365613471}
+http://kbase.us/services/file_type_service/	{"params":["gff3"],"method":"FileType.get_file_type","version":"1.1"}
+http://kbase.us/services/genome_annotation/	{"params":[{"features":[{"protein_translation":"MKLYNLKDHNEQVSFAQAVTQGLGKNQGLFFPHDLPEFSLTEIDEMLKLDFVTRSAKILSAFIGDEIPQEILEERVRAAFAFPAPVANVESDVGCLELFHGPTLAFKDFGGRFMAQMLTHIAGDKPVTILTATSGDTGAAVAHAFYGLPNVKVVILYPRGKISPLQEKLFCTLGGNIETVAIDGDFDACQALVKQAFDDEELKVALGLNSANSINISRLLAQICYYFEAVAQLPQETRNQLVVSVPSGNFGDLTAGLLAKSLGLPVKRFIAATNVNDTVPRFLHDGQWSPKATQATLSNAMDVSQPNNWPRVEELFRRKIWQLKELGYAAVDDETTQQTMRELKELGYTSEPHAAVAYRALRDQLNPGEYGLFLGTAHPAKFKESVEAILGETLDLPKELAERADLPLLSHNLPADFAALRKLMMNHQ","type":"CDS","id":"abc"}]}],"version":"1.1","method":"GenomeAnnotation.assign_functions_to_CDSs"}
+http://kbase.us/services/genotype_phenotype_api/	{"params":["kb|g.3899.exp.1"],"method":"Genotype_PhenotypeAPI.get_traits","version":"1.1"}
+http://140.221.84.183:7049/		{"params":["olson","date",[],0,"/"],"version":"1.1","method":"InvocationService.run_pipeline"}
+http://bio-data-1.mcs.anl.gov/services/invocation/	{"params":["olson","date",[],0,"/"],"version":"1.1","method":"InvocationService.run_pipeline"}
+http://kbase.us/services/idserver/	{"params":["SEED",["fig|1000565.3.peg.4"]],"method":"IDServerAPI.external_ids_to_kbase_ids","version":"1.1"}
+http://kbase.us/services/idserver/	{"params":[["kb|g.0"]],"version":"1.1","method":"IDServerAPI.kbase_ids_to_external_ids"}
+http://kbase.us/services/cdmi_api/	{"params":[["kb|g.0"],["scientific_name"]],"version":"1.1","method":"CDMI_EntityAPI.get_entity_Genome"}
+http://bio-data-1.mcs.anl.gov/services/cdmi_api/	{"params":[["kb|g.0"],["scientific_name"]],"version":"1.1","method":"CDMI_EntityAPI.get_entity_Genome"}
+http://kbase.us/services/networks	{"params":["kb|g.3899.locus.10"],"method":"KBaseNetworks.entity2Datasets","version":"1.1"}
+http://kbase.us/services/ontology/	{"params":[["GO:0006979","GO:0055114"]],"version":"1.1","method":"Ontology.get_go_description"}
+http://kbase.us/services/ontology_service	{"params":[["GO:0006979","GO:0055114"]],"version":"1.1","method":"Ontology.get_go_description"}
+http://kbase.us/services/ontology_service/	{"params":[["GO:0006979","GO:0055114"]],"version":"1.1","method":"Ontology.get_go_description"}
+http://kbase.us/services/protein_info_service/	{"params":[["kb|g.1870.peg.3069"]],"method":"ProteinInfo.fids_to_operons","version":"1.1"}
+http://kbase.us/services/plant_expression_service/	{"params":[],"version":"1.1","method":"PlantExpression.get_all_po"}
+http://kbase.us/services/plant_expression_service	{"params":[],"version":"1.1","method":"PlantExpression.get_all_po"}
+http://kbase.us/services/plant_expression/	{"params":[],"version":"1.1","method":"PlantExpression.get_all_po"}
+http://kbase.us/services/plant_expression	{"params":[],"version":"1.1","method":"PlantExpression.get_all_po"}
+http://kbase.us/services/prom	{"params":[],"method":"PROM.version","version":"1.1"}
+http://kbase.us/services/prom/	{"params":[],"method":"PROM.version","version":"1.1"}
+http://140.221.84.235:7069	{"params":[],"method":"PROM.version","version":"1.1"}
+http://140.221.84.235:7069/	{"params":[],"method":"PROM.version","version":"1.1"}
+http://kbase.us/services/translation/	{"params":[["kb|g.1870.peg.3069"]],"method":"MOTranslation.fids_to_moLocusIds","version":"1.1"}
+http://kbase.us/services/trees/		{"params":["(a,b,c);"],"method":"Tree.get_leaf_count","version":"1.1"}
+http://kbase.us/services/trees/		{"params":[["kb|tree.0"]],"method":"Tree.get_tree_data","version":"1.1"}
+http://bio-data-1.mcs.anl.gov/services/fba_gapfill/	{"version":"1.1", "method":"workspaceService.get_types", "params":[]}
+http://bio-data-1.mcs.anl.gov/services/fba/	{"params":[{"jobid":"0BD0CA04-66C9-11E2-B2C5-C2E06F82D26"}],"version":"1.1","method":"fbaModelServices.check_job"}
+http://kbase.us/services/workspace/	{"version":"1.1", "method":"workspaceService.get_types", "params":[]}
+http://kbase.us/services/workspace_service/	{"version":"1.1", "method":"workspaceService.get_types", "params":[]}
+#
+# http://kbase.us/services/communities_qc/
+# http://kbase.us/services/communities/	-L
+# https://kbase.us/services/cluster_service/
+# http://kbase.us/services/shock-api/
+# http://kbase.us/services/authorization/Sessions/
+http://140.221.84.124:8000/user/cbun/job/status
+#
+# curl -s -d '{"params":[""],"method":"","version":"1.1"}' http://kbase.us/services/ontology_service/
+# curl -s -d '{"params":[""],"method":"","version":"1.1"}' http://kbase.us/services/operon_service/
+# curl -s -d '{"params":[""],"method":"","version":"1.1"}' http://kbase.us/services/phispy/
+# curl -s -d '{"params":[""],"method":"","version":"1.1"}' http://kbase.us/services/plant_expression_service/
+# curl -s -d '{"params":[""],"method":"","version":"1.1"}' http://kbase.us/services/prinseq/
+# curl -s -d '{"params":[""],"method":"","version":"1.1"}' http://kbase.us/services/probabilistic_annotation/
+# curl -s -d '{"params":[""],"method":"","version":"1.1"}' http://kbase.us/services/prom_service/
+# curl -s -d '{"params":[""],"method":"","version":"1.1"}' http://kbase.us/services/regprecise/
+# curl -s -d '{"params":[""],"method":"","version":"1.1"}' http://kbase.us/services/sim_service/
+# curl -s -d '{"params":[""],"method":"","version":"1.1"}' http://kbase.us/services/workspace/
+# curl -s -d '{"params":[""],"method":"","version":"1.1"}' http://kbase.us/services/communities_qc/
+# curl -s -d '{"params":[""],"method":"","version":"1.1"}' http://kbase.us/services/KBaseFBAModeling/
+
