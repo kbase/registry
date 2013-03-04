@@ -32,15 +32,17 @@ http://kbase.us/services/trees/		{"params":["(a,b,c);"],"method":"Tree.get_leaf_
 http://kbase.us/services/trees/		{"params":[["kb|tree.0"]],"method":"Tree.get_tree_data","version":"1.1"}
 http://bio-data-1.mcs.anl.gov/services/fba_gapfill/	{"version":"1.1", "method":"workspaceService.get_types", "params":[]}
 http://bio-data-1.mcs.anl.gov/services/fba/	{"params":[{"jobid":"0BD0CA04-66C9-11E2-B2C5-C2E06F82D26"}],"version":"1.1","method":"fbaModelServices.check_job"}
+#
+# Resty services
+#
 http://kbase.us/services/workspace/	{"version":"1.1", "method":"workspaceService.get_types", "params":[]}
 http://kbase.us/services/workspace_service/	{"version":"1.1", "method":"workspaceService.get_types", "params":[]}
-#
-# http://kbase.us/services/communities_qc/
-# http://kbase.us/services/communities/	-L
-# https://kbase.us/services/cluster_service/
-# http://kbase.us/services/shock-api/
-# http://kbase.us/services/authorization/Sessions/
-http://140.221.84.124:8000/user/cbun/job/status
+http://kbase.us/services/communities_qc/
+http://kbase.us/services/communities/
+https://kbase.us/services/cluster_service/
+http://kbase.us/services/shock-api/
+http://kbase.us/services/authorization/Sessions/
+http://140.221.84.124:8000/user/cbun/job/status/
 #
 # curl -s -d '{"params":[""],"method":"","version":"1.1"}' http://kbase.us/services/ontology_service/
 # curl -s -d '{"params":[""],"method":"","version":"1.1"}' http://kbase.us/services/operon_service/
