@@ -2,18 +2,30 @@ use strict;
 use Data::Dumper;
 use Carp;
 
-
 use Bio::KBase::ServiceRegistry::Client;
 use JSON -support_by_pp;;
 
 use Getopt::Long;
 use Pod::Usage;
 
+# set package variables
+use Config::Simple ('-lc'); # ignoring case, don't save to file.
+our $cfg = {};
+if (defined $ENV{KB_DEPLOYMENT_CONFIG} && -e $ENV{KB_DEPLOYMENT_CONFIG}) {
+    $cfg = new Config::Simple($ENV{KB_DEPLOYMENT_CONFIG});
+}
+else {
+    $cfg = new Config::Simple(syntax=>'ini');
+    $cfg->param('registry.service-host', '127.0.0.1');
+    $cfg->param('registry.service-port', '7070');
+    $cfg->param('registry.service-url', 'http://localhost:7070');
+}
+
 my $man = 0;
 my $help = 0;
 my $infile;
 my %ref;
-	
+
 GetOptions('h'              => \$help,
 	   'help'           => \$help,
 	   'man'            => \$man,
@@ -25,6 +37,11 @@ GetOptions('h'              => \$help,
 	   'ip_allows=s@'   => \@{$ref{ip_allows}},
     ) or pod2usage(2);
 pod2usage(-exitstatus => 0, -verbose => 2) if $help or $man;
+pod2usage(-exitstatus => 0, -verbose => 2) unless
+	defined $ref{service_name} and
+	defined $ref{namespace} and
+	defined $ref{hostname} and
+	defined $ref{port};
 
 # need some logic here to keep the user from doing the wrong
 # thing with the arguments
@@ -40,7 +57,7 @@ if ($ref{idd} and -e $ref{idd} ) {
     print to_json(\%ref, {ascii => 1, pretty => 1});
 }
 
-my $r = Bio::KBase::ServiceRegistry::Client();
+my $r = Bio::KBase::ServiceRegistry::Client->new($cfg->param('registry.service-url'));
 print Dumper(\%ref) and exit;
 
 

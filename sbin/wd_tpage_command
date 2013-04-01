@@ -1,0 +1,4 @@
+<<<<<<< HEAD
+=======
+tpage --define kb_client=Bio::KBase::PlantExpression::Client --define kb_method_name=get_all_po  wd.tt
+>>>>>>> c8c960049d5c1c68326f3a3a3d561d9b4b8e9466
