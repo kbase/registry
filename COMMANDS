@@ -1,0 +1,3 @@
+#group-name	sr	Service Registry
+enumerate_service_urls	sr
+enumerate_services	sr
