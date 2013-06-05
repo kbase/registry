@@ -194,7 +194,7 @@ deploy-scripts:
 # This target should include the creation of a start and stop server script.
 # The start server script needs to know the service port and needs
 # to set the $KB_DEPLOYMENT_CONFIG environment variable.
-deploy-service:
+deploy-service: deploy-cfg
 	mkdir -p $(TARGET)/services/$(SERVICE_DIR)
 	$(TPAGE) $(TPAGE_ARGS) service/start_service.tt > $(TARGET)/services/$(SERVICE_DIR)/start_service
 	chmod +x $(TARGET)/services/$(SERVICE_DIR)/start_service
@@ -248,3 +248,5 @@ build-libs:
 	-rm -r Bio
 	# For some strange reason compile_typespec always creates
 	# this in the root dir.
+
+include $(TOP_DIR)/tools/Makefile.common.rules
